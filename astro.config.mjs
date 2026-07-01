@@ -15,7 +15,7 @@ export default defineConfig({
         { icon: 'github', label: 'GitHub', href: 'https://github.com/mfried40/kiosk-admin' },
       ],
       editLink: {
-        baseUrl: 'https://github.com/mfried40/kiosk-admin/edit/main/site/src/content/docs/',
+        baseUrl: 'https://github.com/kioskadmin/kiosk-admin-site/edit/main/src/content/docs/',
       },
       customCss: ['./src/styles/custom.css'],
       sidebar: [
