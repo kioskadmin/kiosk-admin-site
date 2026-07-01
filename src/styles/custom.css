@@ -1,0 +1,13 @@
+/* Custom theme tweaks for Kiosk Admin docs */
+
+:root {
+  --sl-color-accent-low: #0d2a4a;
+  --sl-color-accent: #0ea5e9;
+  --sl-color-accent-high: #bae6fd;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #e0f2fe;
+  --sl-color-accent: #0284c7;
+  --sl-color-accent-high: #0c4a6e;
+}

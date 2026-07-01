@@ -1,0 +1,60 @@
+---
+title: Fully Kiosk Browser
+description: Using Kiosk Admin with Fully Kiosk Browser devices.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+[Fully Kiosk Browser](https://www.fully-kiosk.com/) is a feature-rich Android kiosk app with a comprehensive local REST API. It is the reference provider for Kiosk Admin and supports every capability.
+
+## Device setup
+
+1. Install **Fully Kiosk Browser** on your Android device.
+2. Open **Settings → Remote Administration (KIOSK)**.
+3. Enable **Remote Administration**.
+4. Set a **Remote Admin Password** — you'll enter this in Kiosk Admin.
+5. Note the **IP address** shown in the app (or use a hostname if you have local DNS).
+
+The REST API listens on port **2323** by default.
+
+## Adding a Fully Kiosk device in Kiosk Admin
+
+| Field | Value |
+|---|---|
+| Provider | `Fully Kiosk Browser` |
+| IP address | Device IP shown in Fully Kiosk settings |
+| Password | Remote Admin Password from Fully Kiosk |
+
+<Aside type="caution">
+The password is transmitted over HTTP to the device. Use this on a trusted local network, or enable HTTPS in Fully Kiosk and add the port to the IP address field (e.g. `192.168.1.100:2323`).
+</Aside>
+
+## Capabilities
+
+All capabilities are supported:
+
+| Capability | Supported |
+|---|:---:|
+| Screenshot | ✅ |
+| Screen on/off | ✅ |
+| URL navigation & reload | ✅ |
+| App restart | ✅ |
+| Screensaver | ✅ |
+| Text-to-speech | ✅ |
+| Volume control | ✅ |
+| Camera capture | ✅ |
+| Audio/video playback | ✅ |
+| Maintenance (reboot, lock) | ✅ |
+| App launcher | ✅ |
+| JavaScript injection | ✅ |
+| Device settings API | ✅ |
+| File management | ✅ |
+| APK install/uninstall | ✅ |
+| Tab management | ✅ |
+| Log viewer | ✅ |
+
+## MQTT
+
+Fully Kiosk Browser has built-in MQTT support. Configure the broker under **Settings → Remote Administration → MQTT**. Kiosk Admin reads status events from `{prefix}/deviceInfo/{deviceId}` and can send commands to `{prefix}/cmd/{deviceId}` when the device has an `mqttDeviceId` configured.
+
+See [MQTT & Real-time](/configuration/mqtt/) for setup details.

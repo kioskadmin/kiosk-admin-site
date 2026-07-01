@@ -1,0 +1,49 @@
+---
+title: Kiosk Admin
+description: Self-hosted fleet management for Android kiosk devices.
+template: splash
+hero:
+  tagline: Control your entire kiosk fleet from one self-hosted dashboard. No cloud subscriptions, no data leaving your network.
+  image:
+    file: ../../assets/hero.svg
+  actions:
+    - text: Get started
+      link: /getting-started/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/mfried40/kiosk-admin
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Everything you need to manage your fleet
+
+<CardGrid stagger>
+  <Card title="Live device overview" icon="laptop">
+    Battery level, screen state, current URL, and online/offline history — updated in real time via MQTT or 30-second polling.
+  </Card>
+  <Card title="Remote control" icon="setting">
+    Screen on/off, URL navigation, restart, screensaver, text-to-speech, volume, JavaScript injection, and more.
+  </Card>
+  <Card title="Multi-provider" icon="puzzle">
+    Supports **Fully Kiosk Browser** and **FreeKiosk** out of the box. The same UI adapts to each provider's capabilities. Adding a new provider takes a single class.
+  </Card>
+  <Card title="Bulk actions" icon="list-format">
+    Send a command to every device in a group with one click. Filter by tag, group, or status before dispatching.
+  </Card>
+  <Card title="Config templates" icon="document">
+    Save device settings as a named template. Apply the same preset to dozens of devices in seconds.
+  </Card>
+  <Card title="Alerts & audit log" icon="warning">
+    Email alerts for offline, low battery, and unplugged events. Every command is logged with user, device, and timestamp.
+  </Card>
+  <Card title="Role-based access" icon="approve-check-circle">
+    **ADMIN** users have full control. **VIEWER** users can monitor and take screenshots but cannot send commands.
+  </Card>
+  <Card title="Zero-config default" icon="rocket">
+    Runs on SQLite out of the box. Switch to PostgreSQL or MongoDB by setting a single environment variable.
+  </Card>
+</CardGrid>
