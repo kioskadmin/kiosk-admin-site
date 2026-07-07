@@ -33,6 +33,7 @@ export default defineConfig({
             { label: 'Overview', link: '/providers/overview/' },
             { label: 'Fully Kiosk Browser', link: '/providers/fully-kiosk/' },
             { label: 'FreeKiosk', link: '/providers/freekiosk/' },
+            { label: 'Fully Cloud', link: '/providers/fully-cloud/' },
             { label: 'Adding a Provider', link: '/providers/adding-a-provider/' },
           ],
         },

@@ -12,14 +12,23 @@ Every device is assigned a provider when it is added. The dashboard reads each d
 ```
 Dashboard  →  POST /api/devices/{id}/command  →  KioskProvider.sendCommand()
                                                          │
-                                            ┌────────────┴────────────┐
-                                     FullyKioskProvider       FreeKioskProvider
-                                     (port 2323, query params) (port 8080, JSON body)
+                                    ┌────────────────────┼────────────────────┐
+                               FullyKiosk           FreeKiosk            FullyCloud
+                               local REST           local REST        api.fully-kiosk.com
+                               port 2323            port 8080           (cloud relay)
 ```
+
+## Supported providers
+
+| Provider | Connection | Auth |
+|---|---|---|
+| [Fully Kiosk Browser](/providers/fully-kiosk/) | Local REST on port 2323 | Password (required) |
+| [FreeKiosk](/providers/freekiosk/) | Local REST on port 8080 | API key (optional) |
+| [Fully Cloud](/providers/fully-cloud/) | `api.fully-kiosk.com` | Email + API key |
 
 ## Capability flags
 
-Each provider exposes a static `capabilities` object. Kiosk Admin reads these flags at build time and at runtime to gate the UI:
+Each provider exposes a static `capabilities` object. Kiosk Admin reads these flags to gate the UI:
 
 | Flag | Controls gated |
 |---|---|
@@ -35,18 +44,13 @@ Each provider exposes a static `capabilities` object. Kiosk Admin reads these fl
 | `hasAppLauncher` | Launch app, send to background |
 | `hasInjectJS` | JavaScript injection |
 | `hasKioskLock` | Kiosk lock/unlock |
+| `hasRemoteControl` | D-pad + keyboard remote |
 | `hasAppManagement` | Clear app data, kill processes |
 | `hasFileManagement` | File transfer |
 | `hasApkManagement` | APK install/uninstall |
 | `hasTabManagement` | Multi-tab management |
 | `hasLogViewer` | Device log stream |
-
-## Supported providers
-
-| Provider | Port | Auth |
-|---|---|---|
-| [Fully Kiosk Browser](/providers/fully-kiosk/) | 2323 | Password (required) |
-| [FreeKiosk](/providers/freekiosk/) | 8080 | API key (optional) |
+| `hasMqttCommands` | Route commands through MQTT |
 
 ## Adding a custom provider
 

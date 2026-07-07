@@ -3,94 +3,87 @@ title: MQTT & Real-time
 description: Enable live device updates and cross-network command routing with MQTT.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Without MQTT, Kiosk Admin polls devices every 30 seconds. With an MQTT broker, device status updates appear instantly — and commands can be routed to devices on **different networks** without port forwarding.
+Without MQTT, Kiosk Admin polls devices every 30 seconds. With MQTT, device status updates appear instantly — and commands can be routed to devices on **different networks** without port forwarding.
 
-## How it works
+## Three modes
 
-```
-Device  ──publishes──▶  MQTT broker  ◀──subscribes──  Kiosk Admin
-                             │
-                Kiosk Admin publishes commands
-                Device subscribes and executes
-```
+| Mode | When to use |
+|---|---|
+| **Embedded broker** | Self-contained setup; no external service needed |
+| **External broker** | You already run Mosquitto, HiveMQ, or similar |
+| **No MQTT** | HTTP polling only (30-second interval) |
 
-Both the device and the server connect **outbound** to the broker. This means devices behind NAT (on a different network, hotel WiFi, remote office) are fully controllable as long as both sides can reach the broker.
+## Embedded broker
 
-## Setup
+The simplest option. Kiosk Admin starts an Aedes MQTT broker inside the same process on port 1883.
 
 <Steps>
 
-1. **Run an MQTT broker**
-
-   [Mosquitto](https://mosquitto.org/) is the simplest option:
-
-   ```bash
-   # Docker
-   docker run -d -p 1883:1883 eclipse-mosquitto
-
-   # or install locally
-   brew install mosquitto   # macOS
-   apt install mosquitto    # Ubuntu/Debian
-   ```
-
-   The broker must be reachable from both the Kiosk Admin server and your devices.
-
-2. **Configure Kiosk Admin**
-
-   Go to **Settings → MQTT** in the UI and enter:
-
-   | Field | Example |
-   |---|---|
-   | Broker URL | `mqtt://192.168.1.10:1883` |
-   | Username | Optional |
-   | Password | Optional |
-   | Topic prefix | `fully` (matches Fully Kiosk's default) |
-
-   Click **Save**. The server will attempt to connect immediately. A green indicator confirms the connection.
-
-3. **Configure the device**
-
-   In **Fully Kiosk Browser → Settings → Remote Administration → MQTT**:
-
-   - Enable MQTT
-   - Set the broker URL (must match what you entered in step 2)
-   - Set the **MQTT Device ID** — this is the identifier used in topics (e.g. `kiosk-lobby`)
-
-4. **Set `mqttDeviceId` on the device in Kiosk Admin**
-
-   Edit the device and set the **MQTT Device ID** field to the same value you set in the Fully Kiosk settings. Once set, commands will automatically route through MQTT when the broker is connected.
+1. Go to **Settings → MQTT**
+2. Click **Embedded Broker**
+3. Set a port (default `1883`)
+4. Optionally set a username and password
+5. Click **Save & Connect**
 
 </Steps>
 
-## Topic format
+The status badge shows "Running on port 1883 — N clients connected" and updates every 5 seconds.
+
+Configure your devices to connect to `mqtt://{server-ip}:1883`.
+
+## External broker
+
+<Steps>
+
+1. Run an MQTT broker (e.g. Mosquitto via Docker):
+   ```bash
+   docker run -d -p 1883:1883 eclipse-mosquitto
+   ```
+
+2. Go to **Settings → MQTT** → **External Broker**
+
+3. Enter the broker URL, optional credentials, and topic prefix (default: `fully`)
+
+4. Click **Save & Connect**
+
+</Steps>
+
+## Topic structure
+
+### Fully Kiosk Browser
 
 | Direction | Topic |
 |---|---|
-| Device → broker (status) | `{prefix}/deviceInfo/{mqttDeviceId}` |
-| Device → broker (events) | `{prefix}/event/{event}/{mqttDeviceId}` |
-| Broker → device (commands) | `{prefix}/cmd/{mqttDeviceId}` |
+| Device → broker (status) | `{prefix}/deviceInfo/{deviceId}` |
+| Device → broker (events) | `{prefix}/event/{event}/{deviceId}` |
 
-## Command routing logic
+Fully Kiosk MQTT is **publish-only** — it sends status updates but does not subscribe to commands. Commands are always sent via the local REST API.
 
-```
-POST /api/devices/{id}/command
-  ├── device.mqttDeviceId is set AND broker is connected?
-  │     └── YES → publish JSON command to {prefix}/cmd/{mqttDeviceId}
-  │                returns { ok: true, transport: "mqtt" }
-  └── NO → call device REST API directly
-            returns { ok: true, transport: "http" }
-```
+### FreeKiosk
+
+| Direction | Topic |
+|---|---|
+| Device → broker (status) | `{baseTopic}/{deviceId}/state` |
+| Device → broker (availability) | `{baseTopic}/{deviceId}/availability` |
+| Broker → device (commands) | `{baseTopic}/{deviceId}/set/{entity}` |
+
+FreeKiosk supports **bidirectional** MQTT. Kiosk Admin learns the base topic from the first incoming state message and routes subsequent commands through MQTT automatically.
+
+## Cross-network devices
+
+Both embedded and external brokers work for cross-network devices: the device connects **outbound** to the broker, so no inbound ports need to be open on the device's network.
+
+For FreeKiosk devices: once an MQTT Device ID is set and the broker is connected, commands are automatically routed through MQTT regardless of whether the device is on the local network or not.
+
+## MQTT device discovery
+
+When a device publishes MQTT messages but is not yet registered in Kiosk Admin, a **"Discovered via MQTT"** banner appears above the device grid. Click **Add** to open the Add Device form pre-filled with:
+- Device name (from MQTT payload)
+- IP address (from MQTT payload)
+- MQTT Device ID
 
 <Aside type="tip">
-MQTT commands are **fire-and-forget** (QoS 0). The broker acknowledges receipt — not the device. If you need confirmation that a command executed, poll `getDeviceInfo` after a short delay.
+MQTT device IDs are also automatically fetched when you save a new device — Kiosk Admin probes the device's REST API during registration.
 </Aside>
-
-## Fallback behaviour
-
-If the broker goes offline, Kiosk Admin automatically falls back to:
-- **HTTP polling** every 30 seconds for status updates
-- **Direct REST API** calls for commands (if the device is reachable)
-
-No configuration change is needed — the fallback is automatic.
