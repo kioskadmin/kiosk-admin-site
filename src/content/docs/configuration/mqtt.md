@@ -31,7 +31,12 @@ The simplest option. Kiosk Admin starts an Aedes MQTT broker inside the same pro
 
 The status badge shows "Running on port 1883 — N clients connected" and updates every 5 seconds.
 
-Configure your devices to connect to `mqtt://{server-ip}:1883`.
+Configure your devices to connect to:
+
+| Protocol | URL |
+|---|---|
+| MQTT TCP | `mqtt://{server-ip}:1883` |
+| MQTT WebSocket | `ws://{server-ip}:9883` (if WS port is set) |
 
 ## External broker
 
@@ -44,9 +49,18 @@ Configure your devices to connect to `mqtt://{server-ip}:1883`.
 
 2. Go to **Settings → MQTT** → **External Broker**
 
-3. Enter the broker URL, optional credentials, and topic prefix (default: `fully`)
+3. Enter the broker URL — all standard schemes are supported:
 
-4. Click **Save & Connect**
+   | Scheme | Example | Notes |
+   |---|---|---|
+   | `mqtt://` | `mqtt://192.168.1.10:1883` | Plain TCP |
+   | `mqtts://` | `mqtts://broker.example.com:8883` | TLS (e.g. HiveMQ Cloud) |
+   | `ws://` | `ws://192.168.1.10:9001` | WebSocket |
+   | `wss://` | `wss://xxx.hivemq.cloud:8884/mqtt` | WebSocket over TLS |
+
+4. Set optional credentials and topic prefix (default: `fully`)
+
+5. Click **Save & Connect**
 
 </Steps>
 
